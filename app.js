@@ -136,7 +136,7 @@ function savePlayerNames(playerNames) {
 }
 
 function getPlayerName(playerIndex) {
-  return playerNames[playerIndex] || `Spieler ${playerIndex + 1}`;
+  return playerNames[playerIndex] || `Player ${playerIndex + 1}`;
 }
 
 // Verlauf zuletzt genutzter Spielernamen (geräteweit, nicht pro Spieler-Slot
@@ -257,7 +257,7 @@ for (const type of TYPES) {
             data-action="inc"
             data-type="${type.key}"
             data-player="${playerIndex}"
-            aria-label="${type.label} Spieler ${playerIndex + 1} erhöhen. Gedrückt halten für Fünferschritte."
+            aria-label="Increase ${type.label} for Player ${playerIndex + 1}. Hold for steps of 5."
           >
             <img class="counter-card__hint" src="icons/ui/plus.png" alt="" />
           </button>
@@ -268,7 +268,7 @@ for (const type of TYPES) {
             data-action="dec"
             data-type="${type.key}"
             data-player="${playerIndex}"
-            aria-label="${type.label} Spieler ${playerIndex + 1} verringern. Gedrückt halten für Fünferschritte."
+            aria-label="Decrease ${type.label} for Player ${playerIndex + 1}. Hold for steps of 5."
           >
             <img class="counter-card__hint" src="icons/ui/minus.png" alt="" />
           </button>
@@ -308,11 +308,11 @@ function render() {
       );
       incBtn.setAttribute(
         'aria-label',
-        `${type.label} ${name} erhöhen. Gedrückt halten für Fünferschritte.`,
+        `Increase ${type.label} for ${name}. Hold for steps of 5.`,
       );
       decBtn.setAttribute(
         'aria-label',
-        `${type.label} ${name} verringern. Gedrückt halten für Fünferschritte.`,
+        `Decrease ${type.label} for ${name}. Hold for steps of 5.`,
       );
       decBtn.disabled = value <= 0;
 
@@ -540,7 +540,7 @@ board.addEventListener('pointerdown', (event) => {
     render();
     vibrate([20, 30, 20]);
     showToast(
-      `${section.querySelector('.type-section__heading span').textContent} zurückgesetzt`,
+      `${section.querySelector('.type-section__heading span').textContent} reset`,
       () => {
         counts[typeKey] = previous;
         saveCounts(counts);
@@ -582,7 +582,7 @@ function renderPlayerBadge(playerIndex, total) {
           type="button"
           class="player-badge__action"
           data-badge-action="ask-reset"
-          aria-label="${escapeHtml(getPlayerName(playerIndex))} zurücksetzen"
+          aria-label="Reset ${escapeHtml(getPlayerName(playerIndex))}"
         >
           ↺
         </button>
@@ -597,11 +597,11 @@ function renderPlayerBadge(playerIndex, total) {
           type="button"
           class="player-badge__action player-badge__action--confirm"
           data-badge-action="confirm-reset"
-          aria-label="Wirklich zurücksetzen"
+          aria-label="Confirm reset"
         >
           ✓
         </button>
-        <button type="button" class="player-badge__action player-badge__action--cancel" data-badge-action="cancel" aria-label="Abbrechen">×</button>
+        <button type="button" class="player-badge__action player-badge__action--cancel" data-badge-action="cancel" aria-label="Cancel">×</button>
       </span>
     `;
   }
@@ -625,7 +625,7 @@ function performBadgeReset(playerIndex) {
   saveCounts(counts);
   render();
   vibrate([20, 30, 20]);
-  showToast(`${name} zurückgesetzt`, () => {
+  showToast(`${name} reset`, () => {
     TYPES.forEach((type, i) => {
       counts[type.key][playerIndex] = previous[i];
     });
@@ -744,7 +744,25 @@ document.addEventListener('keydown', (event) => {
 // ---------- Menü: Anzahl der Spieler, zurücksetzen, Wake Lock ----------
 
 const wakeLockBtn = document.getElementById('wakeLockBtn');
+const watermarkBtn = document.getElementById('watermarkBtn');
 const resetBtn = document.getElementById('resetBtn');
+
+// ---------- Icon-Wasserzeichen an/aus ----------
+
+let watermarksEnabled = localStorage.getItem(`${STORAGE_KEY}.watermarks`) !== 'off';
+
+function applyWatermarkSetting() {
+  document.body.classList.toggle('watermarks-off', !watermarksEnabled);
+  watermarkBtn.setAttribute('aria-pressed', String(watermarksEnabled));
+}
+
+applyWatermarkSetting();
+
+watermarkBtn.addEventListener('click', () => {
+  watermarksEnabled = !watermarksEnabled;
+  localStorage.setItem(`${STORAGE_KEY}.watermarks`, watermarksEnabled ? 'on' : 'off');
+  applyWatermarkSetting();
+});
 const playerCountButtons = document.querySelectorAll('[data-player-count]');
 
 // Kurzwahl im Menü: setzt die ersten `count` Spieler aktiv, alle anderen
@@ -770,7 +788,7 @@ function syncPlayerCountButtons() {
 playerCountButtons.forEach((button) => {
   button.addEventListener('click', () => {
     setActivePlayers(button.dataset.playerCount);
-    showToast(`${activePlayers.filter(Boolean).length} Spieler aktiv`);
+    showToast(`${activePlayers.filter(Boolean).length} players active`);
   });
 });
 
@@ -786,7 +804,7 @@ function renamePlayer(playerIndex, rawName) {
   savePlayerNames(playerNames);
   if (nextName) pushNameHistory(nextName);
   render();
-  showToast(nextName ? `Umbenannt in „${nextName}“` : 'Name zurückgesetzt', () => {
+  showToast(nextName ? `Renamed to "${nextName}"` : 'Name reset', () => {
     playerNames[playerIndex] = previousName;
     savePlayerNames(playerNames);
     render();
@@ -809,7 +827,7 @@ function attachNameHistory(input, dropdown, toggleBtn, onPick) {
         (name, index) => `
         <div class="name-history__item" data-index="${index}">
           <button type="button" class="name-history__pick">${escapeHtml(name)}</button>
-          <button type="button" class="name-history__delete" aria-label="„${escapeHtml(name)}“ aus Verlauf entfernen">×</button>
+          <button type="button" class="name-history__delete" aria-label="Remove “${escapeHtml(name)}” from history">×</button>
         </div>
       `,
       )
@@ -863,9 +881,9 @@ for (let playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex += 1) {
   row.innerHTML = `
     <div class="name-field__input-wrap">
       <input type="text" class="name-field__input" maxlength="${PLAYER_NAME_MAX_LENGTH}" autocomplete="off" />
-      <button type="button" class="name-field__clear" aria-label="Namen entfernen" hidden>×</button>
+      <button type="button" class="name-field__clear" aria-label="Clear name" hidden>×</button>
     </div>
-    <button type="button" class="name-field__toggle" aria-label="Namensvorschläge anzeigen">▾</button>
+    <button type="button" class="name-field__toggle" aria-label="Show name suggestions">▾</button>
     <div class="name-field__history" hidden></div>
   `;
   const input = row.querySelector('.name-field__input');
@@ -873,7 +891,7 @@ for (let playerIndex = 0; playerIndex < MAX_PLAYERS; playerIndex += 1) {
   const toggleBtn = row.querySelector('.name-field__toggle');
   const dropdown = row.querySelector('.name-field__history');
   input.value = playerNames[playerIndex] || '';
-  input.placeholder = `Spieler ${playerIndex + 1}`;
+  input.placeholder = `Player ${playerIndex + 1}`;
   clearBtn.hidden = !input.value;
 
   attachNameHistory(input, dropdown, toggleBtn, (name) => {
@@ -915,11 +933,11 @@ resetBtn.addEventListener('click', () => {
     counts = createEmptyCounts();
     saveCounts(counts);
     render();
-    showToast('Alle Zähler zurückgesetzt');
+    showToast('All counters reset');
     closeMenu();
     return;
   }
-  resetBtnLabel.textContent = 'Sicher? Nochmal tippen';
+  resetBtnLabel.textContent = 'Sure? Tap again';
   resetConfirmTimer = setTimeout(() => {
     resetConfirmTimer = null;
     resetBtnLabel.textContent = resetBtnLabelDefault;
@@ -947,18 +965,18 @@ wakeLockBtn.addEventListener('click', async () => {
     wakeLockWanted = false;
     if (wakeLock) await wakeLock.release();
     wakeLockBtn.setAttribute('aria-pressed', 'false');
-    showToast('Bildschirm-Sperre wie gewohnt');
+    showToast('Screen can sleep again');
     return;
   }
   const acquired = await requestWakeLock();
   wakeLockWanted = acquired;
   wakeLockBtn.setAttribute('aria-pressed', String(acquired));
   if (acquired) {
-    showToast('Bildschirm bleibt an');
+    showToast('Screen stays on');
   } else if ('wakeLock' in navigator) {
-    showToast('Wach-Modus nicht verfügbar');
+    showToast('Wake mode unavailable');
   } else {
-    showToast('Wach-Modus wird von diesem Browser nicht unterstützt');
+    showToast('Wake mode is not supported by this browser');
   }
 });
 

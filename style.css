@@ -398,6 +398,12 @@ img {
   pointer-events: none;
 }
 
+/* Menü-Schalter "Icon-Wasserzeichen" (watermarkBtn in app.js) blendet die
+   Wasserzeichen komplett aus, statt nur die Deckkraft zu ändern. */
+body.watermarks-off .counter-card__type-icon {
+  display: none;
+}
+
 .counter-card__zone {
   flex: 1 1 50%;
   display: flex;
@@ -748,12 +754,39 @@ img {
   background: var(--panel-line);
 }
 
-.side-action[aria-pressed='true'] {
+/* An/Aus-Zustand wird über einen eigenen Schalter angezeigt statt die
+   gesamte Zeile zu markieren – so bleibt z. B. "Reset everything" (kein
+   Umschalter) optisch klar von echten Umschalt-Einstellungen unterschieden. */
+.side-action__switch {
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 24px;
+  border-radius: 999px;
   background: var(--panel-line);
+  position: relative;
+  transition: background 0.15s ease;
 }
 
-.side-action[aria-pressed='true'] img {
-  opacity: 1;
+.side-action__switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink-mute);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.side-action[aria-pressed='true'] .side-action__switch {
+  background: var(--green);
+}
+
+.side-action[aria-pressed='true'] .side-action__switch::after {
+  transform: translateX(16px);
+  background: var(--ink);
 }
 
 .side-action--danger span {
