@@ -1,4 +1,4 @@
-# GraveWatcher – Friedhofszähler für Magic: The Gathering
+# GraveWatcher – Graveyard-Tracker für Magic: The Gathering
 
 Offline-fähige PWA zum Mitzählen der Karten auf 1 bis 4 Friedhöfen, getrennt nach
 Kartentyp (Creatures, Artifacts, Instants, Sorcery, Enchantment, Land). Reines

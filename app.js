@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * GraveWatcher – Friedhofszähler für Magic: The Gathering.
+ * GraveWatcher – Graveyard-Tracker für Magic: The Gathering.
  * Reines HTML/CSS/JS ohne Frameworks und ohne Build-Schritt.
  */
 
@@ -116,7 +116,9 @@ function loadPlayerNames() {
     const parsed = raw && JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length === MAX_PLAYERS) {
       return parsed.map((name) =>
-        typeof name === 'string' && name.trim() ? name.trim().slice(0, PLAYER_NAME_MAX_LENGTH) : null,
+        typeof name === 'string' && name.trim()
+          ? name.trim().slice(0, PLAYER_NAME_MAX_LENGTH)
+          : null,
       );
     }
   } catch {
@@ -145,7 +147,9 @@ function loadNameHistory() {
     const raw = localStorage.getItem(`${STORAGE_KEY}.nameHistory`);
     const parsed = raw && JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      return parsed.filter((name) => typeof name === 'string' && name.trim()).slice(0, NAME_HISTORY_LIMIT);
+      return parsed
+        .filter((name) => typeof name === 'string' && name.trim())
+        .slice(0, NAME_HISTORY_LIMIT);
     }
   } catch {
     // ignoriert, leerer Verlauf.
@@ -535,11 +539,14 @@ board.addEventListener('pointerdown', (event) => {
     saveCounts(counts);
     render();
     vibrate([20, 30, 20]);
-    showToast(`${section.querySelector('.type-section__heading span').textContent} zurückgesetzt`, () => {
-      counts[typeKey] = previous;
-      saveCounts(counts);
-      render();
-    });
+    showToast(
+      `${section.querySelector('.type-section__heading span').textContent} zurückgesetzt`,
+      () => {
+        counts[typeKey] = previous;
+        saveCounts(counts);
+        render();
+      },
+    );
   });
 });
 
