@@ -38,6 +38,11 @@ body {
      Worker Updates ohnehin automatisch im Hintergrund einspielt. Muss auf
      html stehen, da <html> (nicht body) das eigentlich scrollende Element ist. */
   overscroll-behavior: none;
+  /* Manche Force-Dark-Heuristiken prüfen den Hintergrund des Wurzelelements
+     schon vor dem Body-Rendering – ohne expliziten Wert hier (nur auf body)
+     kann das die automatische Nachdunkelung trotz color-scheme fälschlich
+     auslösen. */
+  background-color: var(--bg);
 }
 
 body {
