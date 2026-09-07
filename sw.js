@@ -3,7 +3,7 @@
 // Bei jeder inhaltlichen Änderung an einer der unten gecachten Dateien
 // muss diese Versionsnummer hochgezählt werden, sonst liefert der Cache
 // weiterhin die alte Version aus.
-const CACHE_VERSION = 'gravewatcher-v25';
+const CACHE_VERSION = 'gravewatcher-v27';
 
 const PRECACHE_URLS = [
   './',
