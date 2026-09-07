@@ -2,11 +2,14 @@
 
 const CACHE_NAME = 'gravewatcher';
 
+// style.css/app.js hier mit demselben ?v=N wie in index.html eintragen, sonst
+// zeigt der Offline-Fallback (siehe fetch-Handler unten) eine andere Version
+// als die zuletzt online geladene.
 const PRECACHE_URLS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './style.css?v=1',
+  './app.js?v=1',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -48,7 +51,7 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'reload' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));

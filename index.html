@@ -15,7 +15,12 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/icon-192.png" />
     <link rel="apple-touch-icon" href="icons/icon-192.png" />
-    <link rel="stylesheet" href="style.css" />
+    <!-- ?v=N ist Cache-Busting: zwingt zwischengeschaltete Proxys/CDNs (z. B.
+         Samsung Internets Datensparmodus), die Datei als "neu" zu behandeln
+         und sie nicht aus einem eigenen Server-Cache zu bedienen. Bei jeder
+         inhaltlichen Änderung an style.css/app.js muss N hier hochgezählt
+         werden (siehe auch die passende Zeile im <script>-Tag unten). -->
+    <link rel="stylesheet" href="style.css?v=1" />
   </head>
   <body>
     <div class="app">
@@ -124,6 +129,6 @@
       <button class="toast__undo" id="toastUndoBtn" type="button" hidden>Undo</button>
     </div>
 
-    <script src="app.js"></script>
+    <script src="app.js?v=1"></script>
   </body>
 </html>

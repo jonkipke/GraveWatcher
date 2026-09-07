@@ -1049,7 +1049,7 @@ document.addEventListener('keydown', (event) => {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {
+    navigator.serviceWorker.register('sw.js?v=1').catch(() => {
       // Offline-Fähigkeit ist ein Extra, kein Blocker für die App selbst.
     });
   });
