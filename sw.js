@@ -1,9 +1,6 @@
 'use strict';
 
-// Bei jeder inhaltlichen Änderung an einer der unten gecachten Dateien
-// muss diese Versionsnummer hochgezählt werden, sonst liefert der Cache
-// weiterhin die alte Version aus.
-const CACHE_VERSION = 'gravewatcher-v29';
+const CACHE_NAME = 'gravewatcher';
 
 const PRECACHE_URLS = [
   './',
@@ -32,31 +29,31 @@ const PRECACHE_URLS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
-      .open(CACHE_VERSION)
+      .open(CACHE_NAME)
       .then((cache) => cache.addAll(PRECACHE_URLS))
       .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE_VERSION).map((key) => caches.delete(key))),
-      )
-      .then(() => self.clients.claim()),
-  );
+  event.waitUntil(self.clients.claim());
 });
 
-// Cache-first: aus dem Cache bedienen, nur bei Fehlschlag ans Netz gehen.
+// Network-first: bei Internetverbindung immer die aktuelle Version vom Server
+// holen und den Cache damit auffrischen. Nur wenn das Netz fehlschlägt
+// (offline), wird der zuletzt erfolgreich geladene Stand aus dem Cache
+// bedient. So sind Änderungen sofort sichtbar, ohne eine Versionsnummer
+// hochzählen zu müssen – und die App bleibt trotzdem offline nutzbar.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).catch(() => cached);
-    }),
+    fetch(event.request)
+      .then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return response;
+      })
+      .catch(() => caches.match(event.request)),
   );
 });
