@@ -777,7 +777,9 @@ body.watermarks-off .counter-card__type-icon {
   height: 20px;
   border-radius: 50%;
   background: var(--ink-mute);
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
 }
 
 .side-action[aria-pressed='true'] .side-action__switch {
@@ -1060,7 +1062,7 @@ body.watermarks-off .counter-card__type-icon {
   .side-panel__body {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: 'count names' 'wake names' 'reset names';
+    grid-template-areas: 'count names' 'wake names' 'watermark names' 'reset names';
     gap: 4px 16px;
     padding: 8px 12px;
   }
@@ -1079,6 +1081,10 @@ body.watermarks-off .counter-card__type-icon {
 
   #wakeLockBtn {
     grid-area: wake;
+  }
+
+  #watermarkBtn {
+    grid-area: watermark;
   }
 
   #resetBtn {
