@@ -1,0 +1,1065 @@
+/* [hidden] muss früh stehen, sonst überschreiben spätere display-Regeln das Attribut
+   und Menü/Scrim liegen unsichtbar, aber klickbar über der Seite. */
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  /* Bestätigt Browsern, dass die Seite bewusst dunkel gestaltet ist – ohne das
+     wenden manche Mobilbrowser (Samsung Internet, Chrome) ihre automatische
+     Nachdunkelung an und verfälschen Farben (siehe color-scheme-Meta-Tag). */
+  color-scheme: dark;
+
+  --bg: #141414;
+  --panel: #1f1f1f;
+  --panel-line: #2e2e2e;
+  --green: #1a5a3b;
+  --maroon: #6b1f35;
+  --blue: #36516d;
+  --gold: #69512a;
+  --ink: #ffffff;
+  --ink-mute: #d2d2d2;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  /* Verhindert Chrome/Samsung Internets natives "Pull-to-Refresh" beim
+     Überscrollen ganz oben – das würde die App neu laden, obwohl der Service
+     Worker Updates ohnehin automatisch im Hintergrund einspielt. Muss auf
+     html stehen, da <html> (nicht body) das eigentlich scrollende Element ist. */
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+img {
+  /* Icons sind rein dekorativ und dürfen bei Gedrückt-Halten nicht das
+     Kontextmenü ("Bild speichern") oder die Bildauswahl auslösen. */
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* sichtbarer Fokusrahmen für Tastatur-/Screenreader-Nutzung */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.app {
+  max-width: 620px;
+  margin: 0 auto;
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* Bleibt beim Scrollen des Boards oben sichtbar. */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  background: var(--bg);
+  padding-top: var(--safe-top);
+}
+
+/* ---------- Kopfleiste ---------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 8px;
+}
+
+.total-hex {
+  position: relative;
+  flex: 0 0 auto;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('icons/ui/hex-frame.svg') no-repeat center / contain;
+  cursor: pointer;
+}
+
+.total-hex:active {
+  opacity: 0.8;
+}
+
+.total-hex__value {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.player-totals {
+  display: grid;
+  grid-template-columns: repeat(var(--player-count, 4), 1fr);
+  gap: 6px;
+  padding: 0 12px 12px;
+}
+
+.player-totals span {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 2px solid var(--panel-line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--ink-mute);
+  font-size: 10px;
+}
+
+.player-totals span.player-badge--reset,
+.player-totals span.player-badge--confirm {
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 6px;
+}
+
+.player-badge__action {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.player-badge__action:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.player-badge__action--confirm {
+  color: #8fffb0;
+}
+
+.player-badge__action--cancel {
+  flex: 0 0 auto;
+  width: 24px;
+  color: var(--ink-mute);
+}
+
+.player-totals span[data-player='0'] {
+  border-color: var(--green);
+}
+
+.player-totals span[data-player='1'] {
+  border-color: var(--maroon);
+}
+
+.player-totals span[data-player='2'] {
+  border-color: var(--blue);
+}
+
+.player-totals span[data-player='3'] {
+  border-color: var(--gold);
+}
+
+.player-totals span[data-player='0'] strong {
+  background: var(--green);
+}
+
+.player-totals span[data-player='1'] strong {
+  background: var(--maroon);
+}
+
+.player-totals span[data-player='2'] strong {
+  background: var(--blue);
+}
+
+.player-totals span[data-player='3'] strong {
+  background: var(--gold);
+}
+
+/* Farbiges Badge statt größerer Schrift – hebt die Zahl hervor, ohne die
+   Zeilenhöhe der ohnehin schon engen Box zu verändern. */
+.player-totals strong {
+  flex: 0 0 auto;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lange Spielernamen dürfen die Box nie sprengen – abschneiden statt
+   umbrechen oder die Zahl daneben zu verdrängen. */
+.player-totals b {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-panel {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 8px 4px;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.type-panel:active {
+  background: var(--panel-line);
+}
+
+.type-panel__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.type-panel__col img {
+  width: 16px;
+  height: 16px;
+}
+
+.type-panel__col span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.menu-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.menu-btn img {
+  width: 24px;
+  height: 24px;
+}
+
+.menu-btn:active {
+  background: var(--panel);
+}
+
+/* ---------- Board ---------- */
+
+.board {
+  /* padding-top gleicht die negative Margin der Überschrift aus (siehe
+     .type-section__heading), sonst ragt die erste Kategorie unter den
+     Sticky-Header und ein Klickstreifen dort geht verloren. */
+  padding: 14px 12px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Padding statt margin für die Grundabstände, damit die ganze Fläche
+   (nicht nur der Text) als Tippziel zum Ein-/Ausklappen dient. */
+.type-section__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -10px -6px 0;
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  cursor: pointer;
+}
+
+.type-section__heading:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.type-section__heading img {
+  width: 16px;
+  height: 16px;
+}
+
+.type-section__chevron {
+  margin-left: auto;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  color: var(--ink-mute);
+  transition: transform 0.15s ease-out;
+}
+
+.type-section--collapsed .type-section__chevron {
+  transform: rotate(-90deg);
+}
+
+.type-section--collapsed .type-section__row {
+  display: none;
+}
+
+.type-section__row {
+  display: grid;
+  grid-template-columns: repeat(var(--player-count, 4), minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* Karte ohne sichtbare Knöpfe: die obere Hälfte zählt hoch, die untere
+   runter (wie bei der App "Lotus"). Die Zahl liegt als Overlay über der
+   Trennlinie, damit sie unabhängig von den Tippflächen mittig sitzt. */
+.counter-card {
+  position: relative;
+  border-radius: 14px;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  /* visible statt hidden: die +1/+5-Tipp-Anzeige (.counter-card__pop) darf
+     beim Wegfaden über den oberen Kartenrand hinaus nach oben schweben. */
+  overflow: visible;
+}
+
+.counter-card--player-1 {
+  background: var(--green);
+}
+
+.counter-card--player-2 {
+  background: var(--maroon);
+}
+
+.counter-card--player-3 {
+  background: var(--blue);
+}
+
+.counter-card--player-4 {
+  background: var(--gold);
+}
+
+/* Ganz leichtes Wasserzeichen des Kartentyps im Hintergrund; z-index:-1 hält
+   es hinter dem Werte-Overlay und den Zonen, ohne deren Klicks zu stören. */
+.counter-card__type-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  opacity: 0.1;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.counter-card__zone {
+  flex: 1 1 50%;
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+  /* "manipulation" statt "none": die Zonen sollen tippbar sein, ohne das
+     vertikale Scrollen des Boards zu blockieren (viele Abschnitte). */
+  touch-action: manipulation;
+}
+
+.counter-card__zone--inc {
+  align-items: flex-start;
+  padding-top: 10px;
+}
+
+.counter-card__zone--dec {
+  align-items: flex-end;
+  padding-bottom: 10px;
+}
+
+.counter-card__zone:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.counter-card__zone:disabled {
+  cursor: not-allowed;
+}
+
+.counter-card__hint {
+  width: 16px;
+  height: 16px;
+  opacity: 0.32;
+}
+
+.counter-card__zone:disabled .counter-card__hint {
+  opacity: 0.12;
+}
+
+.counter-card__value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* Kurzes Tipp-Feedback: bleibt stehen, solange schnell weitergetippt wird
+   (sammelt sich zu +5 etc.), und schwebt erst nach einer kurzen Pause nach
+   oben weg (siehe showChangePopup in app.js). */
+.counter-card__pop {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.counter-card__pop--leaving {
+  animation: counter-card-pop-fade 0.5s ease-out forwards;
+}
+
+@keyframes counter-card-pop-fade {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -28px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .counter-card__pop--leaving {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ---------- Seitenmenü ---------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 20;
+}
+
+.side-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(320px, 88vw);
+  max-height: min(95vh, 640px);
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 16px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transform: translate(-50%, -50%) scale(0.94);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.18s ease-out,
+    opacity 0.18s ease-out;
+}
+
+.side-panel.is-open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel {
+    transition: none;
+  }
+}
+
+.side-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.side-panel__header h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.icon-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.icon-btn:active {
+  background: var(--panel-line);
+}
+
+.side-panel__body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-count-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 14px;
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.player-count-setting__label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.player-count-setting__options {
+  display: flex;
+  gap: 5px;
+}
+
+.player-count-setting__options button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  color: var(--ink-mute);
+  font-weight: 700;
+}
+
+.player-count-setting__options button.is-selected {
+  border-color: var(--ink-mute);
+  background: var(--panel-line);
+  color: var(--ink);
+}
+
+.player-names-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-bottom: 1px solid var(--panel-line);
+}
+
+.player-names-setting__label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.player-names-setting__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.name-field {
+  position: relative;
+  display: flex;
+  gap: 6px;
+}
+
+.name-field__input-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.name-field__input {
+  width: 100%;
+  padding: 9px 28px 9px 10px;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.name-field__clear {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ink-mute);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.name-field__clear:active {
+  background: var(--panel-line);
+  color: var(--ink);
+}
+
+.name-field__toggle {
+  flex: 0 0 auto;
+  width: 34px;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink-mute);
+  font-size: 12px;
+}
+
+.name-field__toggle:active {
+  background: var(--panel-line);
+  color: var(--ink);
+}
+
+.name-field__history {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 160px;
+  overflow-y: auto;
+  background: #2a2a2a;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.name-history__item {
+  display: flex;
+  align-items: center;
+}
+
+.name-history__pick {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name-history__pick:active {
+  background: var(--panel-line);
+}
+
+.name-history__delete {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-mute);
+  font-size: 14px;
+}
+
+.name-history__delete:active {
+  color: var(--ink);
+  background: var(--panel-line);
+}
+
+.side-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.side-action img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  opacity: 0.85;
+}
+
+.side-action:active {
+  background: var(--panel-line);
+}
+
+.side-action[aria-pressed='true'] {
+  background: var(--panel-line);
+}
+
+.side-action[aria-pressed='true'] img {
+  opacity: 1;
+}
+
+.side-action--danger span {
+  color: #ff8f9c;
+}
+
+/* ---------- Vollbildübersicht ---------- */
+
+.fullscreen-overview {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 24px;
+  padding-top: calc(24px + var(--safe-top));
+  padding-bottom: calc(24px + var(--safe-bottom));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+}
+
+.fullscreen-overview.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fullscreen-overview {
+    transition: none;
+  }
+}
+
+.fullscreen-overview__hex {
+  flex: 0 0 auto;
+  width: 45vw;
+  height: 45vw;
+  max-width: 220px;
+  max-height: 220px;
+  background: url('icons/ui/hex-frame.svg') no-repeat center / contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-overview__hex-value {
+  font-size: clamp(40px, 15vw, 64px);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.fullscreen-overview__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.fullscreen-overview__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 6px;
+  background: var(--panel);
+  border-radius: 14px;
+}
+
+.fullscreen-overview__tile img {
+  width: 26px;
+  height: 26px;
+}
+
+.fullscreen-overview__tile span {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.fullscreen-overview__tile small {
+  font-size: 9px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--safe-bottom));
+  transform: translate(-50%, 0);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  background: #2a2a2a;
+  color: var(--ink);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  z-index: 40;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  animation: toast-in-out var(--toast-duration, 2.2s) ease forwards;
+}
+
+.toast__undo {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: #8fc4ff;
+  text-decoration: underline;
+}
+
+@keyframes toast-in-out {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  12%,
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+/* ---------- Querformat (Handy quer, wenig Höhe) ---------- */
+/* max-height statt reiner orientation-Abfrage, damit Tablets/Desktop im
+   Querformat (die genug Höhe haben) unverändert bleiben. */
+@media (orientation: landscape) and (max-height: 500px) {
+  html,
+  body {
+    overflow: hidden;
+  }
+
+  /* Eigenes Layout statt der Portrait-Reihenfolge: Typ-Übersicht wird zur
+     linken Spalte unter dem Sechseck, Spieler-Summen bleiben oben, Menü
+     bleibt oben rechts. display: contents "entfernt" die Zwischen-Boxen
+     (sticky-header, topbar) aus dem Layout, ihre Kinder werden direkt zu
+     Grid-Feldern von .app – die Sticky-Logik wird dafür nicht gebraucht,
+     weil hier stattdessen nur noch .board selbst scrollt. */
+  .app {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'hex ptotals menu' 'types board board';
+    column-gap: 10px;
+    max-width: none;
+    height: 100vh;
+    padding-top: var(--safe-top);
+    overflow: hidden;
+  }
+
+  .sticky-header,
+  .topbar {
+    display: contents;
+  }
+
+  .total-hex {
+    grid-area: hex;
+    margin: 8px auto 0;
+  }
+
+  /* Eigene, klar abgegrenzte Karte statt des sehr flachen Portrait-Streifens.
+     align-self/justify-self: die Box soll sich exakt um ihren Inhalt legen
+     (nicht die ganze Spalte ausfüllen) und mittig unter dem Sechseck sitzen;
+     max-height + overflow bleiben als Absicherung für sehr niedrige Screens. */
+  .type-panel {
+    grid-area: types;
+    grid-template-columns: 1fr;
+    grid-auto-rows: min-content;
+    align-content: start;
+    align-self: start;
+    justify-self: center;
+    width: fit-content;
+    gap: 0;
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  }
+
+  .type-panel__col {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 7px 2px;
+    border-bottom: 1px solid var(--panel-line);
+  }
+
+  .type-panel__col:last-child {
+    border-bottom: none;
+  }
+
+  .type-panel__col img {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+  }
+
+  .type-panel__col span {
+    font-size: 13px;
+  }
+
+  .player-totals {
+    grid-area: ptotals;
+    align-self: start;
+    margin: 6px 0 0;
+  }
+
+  .menu-btn {
+    grid-area: menu;
+    align-self: start;
+    margin: 6px 6px 0 0;
+  }
+
+  .board {
+    grid-area: board;
+    min-height: 0;
+    overflow-y: auto;
+    gap: 8px;
+    padding: 8px 12px 20px;
+  }
+
+  .type-section__heading {
+    margin: -6px -6px 0;
+    padding: 6px 6px;
+  }
+
+  .counter-card {
+    min-height: 84px;
+  }
+
+  .counter-card__value {
+    font-size: 24px;
+  }
+
+  .counter-card__type-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Breiter statt hoch: Einstellungen und Namensfelder nebeneinander, damit
+     der Popup-Inhalt auch bei wenig Höhe komplett ohne Scrollen passt. */
+  .side-panel {
+    width: min(560px, 92vw);
+    max-height: 92vh;
+  }
+
+  .side-panel__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 'count names' 'wake names' 'reset names';
+    gap: 4px 16px;
+    padding: 8px 12px;
+  }
+
+  .player-count-setting {
+    grid-area: count;
+    padding: 4px 0;
+    border-bottom: none;
+  }
+
+  .player-names-setting {
+    grid-area: names;
+    padding: 4px 0;
+    border-bottom: none;
+  }
+
+  #wakeLockBtn {
+    grid-area: wake;
+  }
+
+  #resetBtn {
+    grid-area: reset;
+  }
+
+  .side-action {
+    padding: 6px 8px;
+  }
+
+  .fullscreen-overview {
+    flex-direction: row;
+    gap: 28px;
+    padding: 16px 24px;
+  }
+
+  .fullscreen-overview__hex {
+    width: 34vh;
+    height: 34vh;
+    max-width: none;
+    max-height: none;
+  }
+
+  .fullscreen-overview__grid {
+    max-width: 480px;
+  }
+}
