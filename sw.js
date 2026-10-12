@@ -8,8 +8,8 @@ const CACHE_NAME = 'gravewatcher';
 const PRECACHE_URLS = [
   './',
   './index.html',
-  './style.css?v=1',
-  './app.js?v=1',
+  './style.css?v=17',
+  './app.js?v=19',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -27,6 +27,8 @@ const PRECACHE_URLS = [
   './icons/types/sorcery.png',
   './icons/types/enchantment.png',
   './icons/types/land.png',
+  './icons/types/battles.png',
+  './icons/types/planeswalker.png',
 ];
 
 self.addEventListener('install', (event) => {

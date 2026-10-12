@@ -127,6 +127,28 @@ img {
   line-height: 1;
 }
 
+/* Dezentes Eck-Badge: wie viele unterschiedliche Kartentypen gerade im
+   Spiel sind (siehe countDistinctTypes() in app.js) – bewusst klein und
+   gedämpft, damit die große Zahl im Sechseck die Hauptaussage bleibt. */
+.total-hex__type-count {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--panel-line);
+  color: var(--ink-mute);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
 .player-totals {
   display: grid;
   grid-template-columns: repeat(var(--player-count, 4), 1fr);
@@ -147,39 +169,15 @@ img {
   background: var(--panel);
   color: var(--ink-mute);
   font-size: 10px;
+  cursor: pointer;
 }
 
-.player-totals span.player-badge--reset,
-.player-totals span.player-badge--confirm {
-  justify-content: center;
-  gap: 4px;
-  padding: 5px 6px;
-}
-
-.player-badge__action {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  border-radius: 6px;
-  font-size: 13px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.player-badge__action:active {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.player-badge__action--confirm {
-  color: #8fffb0;
-}
-
-.player-badge__action--cancel {
-  flex: 0 0 auto;
-  width: 24px;
-  color: var(--ink-mute);
+/* Klick filtert das Board auf nur diesen Spieler (siehe `selectedPlayer` in
+   app.js); nochmal antippen zeigt wieder alle. Lang drücken setzt stattdessen
+   diesen Spieler zurück (mit Rückgängig-Option im Toast) – dieselbe Geste wie
+   beim Langdruck auf eine Kategorie-Überschrift. */
+.player-totals span:active {
+  background: var(--panel-line);
 }
 
 .player-totals span[data-player='0'] {
@@ -214,6 +212,32 @@ img {
   background: var(--gold);
 }
 
+/* Ausgewählter Spieler (Board ist auf ihn gefiltert): Box wird in seiner
+   Farbe gefüllt statt nur umrandet, deutlich erkennbar als "aktiv". */
+.player-totals span.player-badge--selected[data-player='0'] {
+  background: var(--green);
+}
+
+.player-totals span.player-badge--selected[data-player='1'] {
+  background: var(--maroon);
+}
+
+.player-totals span.player-badge--selected[data-player='2'] {
+  background: var(--blue);
+}
+
+.player-totals span.player-badge--selected[data-player='3'] {
+  background: var(--gold);
+}
+
+.player-badge--selected {
+  color: var(--ink);
+}
+
+.player-badge--selected strong {
+  background: rgba(0, 0, 0, 0.25);
+}
+
 /* Farbiges Badge statt größerer Schrift – hebt die Zahl hervor, ohne die
    Zeilenhöhe der ohnehin schon engen Box zu verändern. */
 .player-totals strong {
@@ -238,7 +262,11 @@ img {
 .type-panel {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  /* Variable statt Inline-Style von render(): so kann die Querformat-Regel
+     weiter unten (fester Wert statt var()) die Spaltenzahl per normaler
+     CSS-Kaskade überschreiben, statt von einem Inline-Style blockiert zu
+     werden. */
+  grid-template-columns: repeat(var(--type-panel-columns, 8), 1fr);
   background: var(--panel);
   border-radius: 16px;
   padding: 8px 4px;
@@ -261,6 +289,7 @@ img {
 .type-panel__col img {
   width: 16px;
   height: 16px;
+  object-fit: contain;
 }
 
 .type-panel__col span {
@@ -289,6 +318,63 @@ img {
 }
 
 /* ---------- Board ---------- */
+
+/* Immer sichtbar: setzt je nach `selectedPlayer` (app.js) entweder nur den
+   fokussierten Spieler oder (ohne Fokus) alles zurück. Schwebt per
+   position: fixed über dem Inhalt statt als Element im Board-Grid zu
+   stehen – frisst dadurch keine Kachel, die sonst ein Zähler wäre, und
+   bleibt beim Scrollen immer erreichbar. Ein Tipp blendet links einen
+   grünen Bestätigen-Button (✓) ein und färbt den Reset-Button selbst zu
+   einem roten Abbrechen-Button (✕) um – explizite Zwei-Tasten-Bestätigung
+   statt des fehleranfälligeren "nochmal auf denselben Button tippen". */
+.board-reset-controls {
+  position: fixed;
+  right: calc(16px + var(--safe-right));
+  bottom: calc(16px + var(--safe-bottom));
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.board-reset-btn {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: background 0.15s ease;
+}
+
+.board-reset-btn img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.9;
+}
+
+.board-reset-btn:active {
+  filter: brightness(1.2);
+}
+
+/* Bestätigen (✓, grün) – erscheint nur während der Bestätigung, direkt
+   links vom Reset-/Abbrechen-Button. */
+.board-reset-btn--confirm {
+  background: var(--green);
+}
+
+/* Der Reset-Button selbst wird während der Bestätigung zum Abbrechen-Button
+   (✕, rot) an genau derselben Stelle. */
+.board-player-reset--armed {
+  background: var(--maroon);
+}
 
 .board {
   /* padding-top gleicht die negative Margin der Überschrift aus (siehe
@@ -324,6 +410,21 @@ img {
 .type-section__heading img {
   width: 16px;
   height: 16px;
+  object-fit: contain;
+}
+
+/* Immer einzeilig mit Ellipsis statt Umbruch: ein zweizeiliger Titel würde
+   genau diese eine Kachel höher machen als ihre Nachbarn im Raster (sichtbar
+   z. B. bei "Enchantment Creature" im engen gefilterten Raster) – so bleibt
+   jede Kategorie-/Kombo-Kachel überall gleich hoch, unabhängig von der
+   Label-Länge. min-width: 0 ist nötig, damit das Flex-Kind überhaupt
+   schrumpfen und die Ellipsis greifen darf. */
+.type-section__label,
+.combo-section__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .type-section__chevron {
@@ -345,7 +446,11 @@ img {
 
 .type-section__row {
   display: grid;
-  grid-template-columns: repeat(var(--player-count, 4), minmax(0, 1fr));
+  /* Eigene Variable statt --player-count: die Spieler-Summen-Zeile zeigt immer
+     alle aktiven Spieler, aber die Zählerkarten-Reihen kollabieren auf 1
+     Spalte, sobald das Board auf einen Spieler gefiltert ist (siehe
+     `selectedPlayer` in app.js). */
+  grid-template-columns: repeat(var(--counter-columns, 4), minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -393,6 +498,7 @@ img {
   transform: translate(-50%, -50%);
   width: 72px;
   height: 72px;
+  object-fit: contain;
   opacity: 0.1;
   z-index: -1;
   pointer-events: none;
@@ -493,6 +599,235 @@ body.watermarks-off .counter-card__type-icon {
   }
 }
 
+/* ---------- Type-Gruppe ("Combo Types") ---------- */
+/* Einklappbare Oberkategorie unterhalb der Hauptkategorien, für
+   Kombinationen aus bereits bestehenden Typen (siehe COMBOS in app.js).
+   Jede enthaltene Kombo-Karte lässt sich zusätzlich einzeln ein-/ausklappen. */
+
+.type-group__divider {
+  height: 1px;
+  background: var(--panel-line);
+  margin: 0 6px 14px;
+}
+
+.type-group__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -6px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  cursor: pointer;
+}
+
+.type-group__heading:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.type-group__heading .type-section__chevron {
+  margin-left: auto;
+}
+
+.type-group--collapsed .type-group__heading .type-section__chevron {
+  transform: rotate(-90deg);
+}
+
+.type-group--collapsed .type-group__body {
+  display: none;
+}
+
+.type-group__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+/* Kombo-Karten haben keinen Langdruck-Reset, aber dieselbe Klapplogik wie
+   normale Kategorien (Klick auf die Überschrift, Chevron dreht sich). */
+.combo-section__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  cursor: pointer;
+}
+
+.combo-section__heading .type-section__chevron {
+  margin-left: auto;
+  width: 13px;
+  height: 13px;
+}
+
+.combo-section--collapsed .combo-section__heading .type-section__chevron {
+  transform: rotate(-90deg);
+}
+
+.combo-section--collapsed .type-section__row {
+  display: none;
+}
+
+.combo-section__icons {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.combo-section__icons img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.combo-section__icons img:not(:first-child) {
+  margin-left: -4px;
+}
+
+.counter-card__combo-icons {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 6px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.counter-card__combo-icons img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  /* Jetzt dasselbe dezente Wasserzeichen wie .counter-card__type-icon (seit
+     Kombo-Karten einen eigenen __value haben, sind die Icons nicht mehr der
+     einzige Karteninhalt) – reagiert deshalb auch auf denselben Schalter. */
+  opacity: 0.1;
+}
+
+body.watermarks-off .counter-card__combo-icons {
+  display: none;
+}
+
+/* ---------- Gefiltertes Board (ein Spieler ausgewählt) ---------- */
+/* Statt der sonst vollbreiten Kategorie-Stapel übereinander: ein dichteres
+   mehrspaltiges Raster, damit möglichst viele Typen/Kombos gleichzeitig ohne
+   Scrollen sichtbar sind (siehe `selectedPlayer`/.board--filtered in
+   app.js). Jede .type-section/.combo-section bleibt als eigenständige Kachel
+   bestehen (Überschrift + die eine Karte des ausgewählten Spielers), nur die
+   äußere Anordnung wird enger. */
+
+/* minmax(0, 1fr) statt nur 1fr: ohne das verweigert eine Spalte das
+   Schrumpfen unter die min-content-Breite ihres Inhalts (z. B. ein langes
+   Kombo-Label) und das ganze Board überläuft horizontal, statt dass die
+   Ellipsis (siehe .type-section__label/.combo-section__label oben) greift.
+   min-width: 0 auf den Raster-Elementen selbst ist zusätzlich nötig, weil
+   auch Grid-Items standardmäßig nicht unter ihre min-content-Breite
+   schrumpfen. */
+.board--filtered > .type-section,
+.board--filtered .type-group__body > .type-section,
+.board--filtered .type-group__body > .combo-section {
+  min-width: 0;
+}
+
+.board--filtered {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px;
+}
+
+@media (min-width: 400px) {
+  .board--filtered {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Die Gruppe ("Combo Types") spannt als Abschnitts-Überschrift die volle
+   Breite, ihr Inhalt bekommt aber dasselbe dichte Raster wie oben – praktisch
+   zwei verschachtelte Raster statt einem. Der (bewusst kleine) Reset-Button
+   bekommt dagegen keine eigene Spalte zugewiesen: er landet einfach als
+   erste Kachel neben der ersten Kategorie. */
+.board--filtered > .type-group {
+  grid-column: 1 / -1;
+}
+
+.board--filtered .type-group__body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Ohne diese Zeile gewinnt obige Regel (gleiche Spezifität, aber später im
+   Dokument) gegen ".type-group--collapsed .type-group__body { display: none }"
+   weiter oben – die Gruppe ließe sich dann im gefilterten Zustand zwar
+   anklicken, aber nie wirklich zuklappen. Höhere Spezifität (3 statt 2
+   Klassen) stellt das Zuklappen sicher zurück. */
+.board--filtered .type-group--collapsed .type-group__body {
+  display: none;
+}
+
+@media (min-width: 400px) {
+  .board--filtered .type-group__body {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.board--filtered .type-section__heading,
+.board--filtered .combo-section__heading {
+  margin: 0;
+  padding: 4px 2px;
+  font-size: 10px;
+  gap: 5px;
+  /* Einzelne Kategorien/Kombos lassen sich im gefilterten Zustand nicht mehr
+     einklappen (siehe Klick-Handler in app.js) – Chevron weg und kein
+     Tipp-Feedback mehr, damit das auch optisch klar ist. Nur die
+     Oberkategorie (.type-group__heading) bleibt bedienbar. */
+  cursor: default;
+}
+
+.board--filtered .type-section__heading:active,
+.board--filtered .combo-section__heading:active {
+  background: none;
+}
+
+.board--filtered .type-section__heading .type-section__chevron,
+.board--filtered .combo-section__heading .type-section__chevron {
+  display: none;
+}
+
+.board--filtered .type-section__heading img {
+  width: 13px;
+  height: 13px;
+}
+
+.board--filtered .counter-card {
+  min-height: 78px;
+}
+
+.board--filtered .counter-card__value {
+  font-size: 22px;
+}
+
+.board--filtered .counter-card__type-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.board--filtered .counter-card__combo-icons img {
+  width: 22px;
+  height: 22px;
+}
+
 /* ---------- Seitenmenü ---------- */
 
 .scrim {
@@ -573,12 +908,22 @@ body.watermarks-off .counter-card__type-icon {
   gap: 6px;
 }
 
+/* Trennt die drei Einstellungsgruppen (Spieler, App-Verhalten, Kartentypen)
+   optisch voneinander, ohne gleich eine große Lücke aufzureißen – zusammen
+   mit dem normalen Flex-gap ergibt das spürbar mehr Abstand genau an den
+   Gruppengrenzen, innerhalb einer Gruppe bleibt es eng. Im Querformat (eigenes
+   Grid-Layout weiter unten) ohne Bedeutung, dort daher ausgeblendet. */
+.side-panel__divider {
+  height: 1px;
+  background: var(--panel-line);
+  margin: 4px 12px;
+}
+
 .player-count-setting {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px 14px;
-  border-bottom: 1px solid var(--panel-line);
+  padding: 8px 12px;
 }
 
 .player-count-setting__label {
@@ -606,12 +951,58 @@ body.watermarks-off .counter-card__type-icon {
   color: var(--ink);
 }
 
+/* Zwei unabhängige Checkboxen nebeneinander statt zweier vollbreiter
+   Schalter-Zeilen – Planeswalker und Battles lassen sich getrennt ein-/
+   ausblenden (siehe optionalTypeVisibility in app.js), ohne zusätzliche
+   Höhe im Menü zu beanspruchen. Überschrift sitzt über (nicht neben) den
+   beiden Boxen, letztes Element im Menü darum ohne trennenden Rand unten. */
+.type-visibility-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px 14px;
+}
+
+.type-visibility-setting__label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.type-visibility-setting__options {
+  display: flex;
+  gap: 6px;
+}
+
+.type-visibility-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--ink-mute);
+  cursor: pointer;
+}
+
+.type-visibility-option:has(input:checked) {
+  border-color: var(--ink-mute);
+  background: var(--panel-line);
+  color: var(--ink);
+}
+
+.type-visibility-option input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
 .player-names-setting {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-bottom: 1px solid var(--panel-line);
 }
 
 .player-names-setting__label {
@@ -791,10 +1182,6 @@ body.watermarks-off .counter-card__type-icon {
   background: var(--ink);
 }
 
-.side-action--danger span {
-  color: #ff8f9c;
-}
-
 /* ---------- Vollbildübersicht ---------- */
 
 .fullscreen-overview {
@@ -844,9 +1231,35 @@ body.watermarks-off .counter-card__type-icon {
   font-variant-numeric: tabular-nums;
 }
 
+/* Rückt näher an das Sechseck heran, statt den vollen Flex-gap (32px) der
+   Vollbildübersicht auch hier zwischen Hex und Meta-Zeile zu übernehmen. */
+.fullscreen-overview__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: -20px;
+  color: var(--ink-mute);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Zeigt nur den Spielernamen (kein Erklärtext) – Position direkt unterm
+   Sechseck plus Akzentfarbe genügen, um "das hier ist gerade fokussiert" zu
+   vermitteln, auch bei individuellen Spielernamen. */
+.fullscreen-overview__scope {
+  color: #8fc4ff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
 .fullscreen-overview__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* minmax(0, 1fr): verhindert, dass ein langes Label (z. B. "Planeswalker")
+     auf sehr schmalen Bildschirmen die Spalte über die verfügbare Breite
+     hinaus aufzwingt – siehe dieselbe Begründung beim gefilterten Board. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   width: 100%;
   max-width: 420px;
@@ -857,6 +1270,7 @@ body.watermarks-off .counter-card__type-icon {
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  min-width: 0;
   padding: 16px 6px;
   background: var(--panel);
   border-radius: 14px;
@@ -865,6 +1279,7 @@ body.watermarks-off .counter-card__type-icon {
 .fullscreen-overview__tile img {
   width: 26px;
   height: 26px;
+  object-fit: contain;
 }
 
 .fullscreen-overview__tile span {
@@ -875,6 +1290,10 @@ body.watermarks-off .counter-card__type-icon {
 }
 
 .fullscreen-overview__tile small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 9px;
   color: var(--ink-mute);
   text-transform: uppercase;
@@ -1034,6 +1453,16 @@ body.watermarks-off .counter-card__type-icon {
     padding: 8px 12px 20px;
   }
 
+  /* Querformat bringt mehr Breite als Höhe – mehr Spalten statt mehr Zeilen. */
+  .board--filtered,
+  .board--filtered .type-group__body {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .board--filtered .counter-card {
+    min-height: 64px;
+  }
+
   .type-section__heading {
     margin: -6px -6px 0;
     padding: 6px 6px;
@@ -1059,24 +1488,44 @@ body.watermarks-off .counter-card__type-icon {
     max-height: 92vh;
   }
 
+  /* Die Divider bekommen hier eigene, schmale Zeilen in der linken Spalte
+     zugewiesen (rechts bleibt es jeweils die durchlaufende "names"-Fläche) –
+     ohne das hätten sie als unbenannte Grid-Items keinen sinnvollen Platz in
+     den festen grid-template-areas und müssten ersatzlos verschwinden. */
   .side-panel__body {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: 'count names' 'wake names' 'watermark names' 'reset names';
+    grid-template-areas:
+      'count names'
+      'pdiv names'
+      'wake names'
+      'watermark names'
+      'tdiv names'
+      'moretypes names';
     gap: 4px 16px;
     padding: 8px 12px;
+  }
+
+  .side-panel__divider {
+    margin: 2px 0;
+  }
+
+  #sidePanelDividerPlayers {
+    grid-area: pdiv;
+  }
+
+  #sidePanelDividerToggles {
+    grid-area: tdiv;
   }
 
   .player-count-setting {
     grid-area: count;
     padding: 4px 0;
-    border-bottom: none;
   }
 
   .player-names-setting {
     grid-area: names;
     padding: 4px 0;
-    border-bottom: none;
   }
 
   #wakeLockBtn {
@@ -1087,8 +1536,9 @@ body.watermarks-off .counter-card__type-icon {
     grid-area: watermark;
   }
 
-  #resetBtn {
-    grid-area: reset;
+  #typeVisibilitySetting {
+    grid-area: moretypes;
+    padding: 4px 0;
   }
 
   .side-action {

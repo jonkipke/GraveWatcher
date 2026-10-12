@@ -20,7 +20,7 @@
          und sie nicht aus einem eigenen Server-Cache zu bedienen. Bei jeder
          inhaltlichen Änderung an style.css/app.js muss N hier hochgezählt
          werden (siehe auch die passende Zeile im <script>-Tag unten). -->
-    <link rel="stylesheet" href="style.css?v=1" />
+    <link rel="stylesheet" href="style.css?v=17" />
   </head>
   <body>
     <div class="app">
@@ -36,6 +36,9 @@
             aria-label="Total across all players, tap for full-screen view"
           >
             <span class="total-hex__value" id="totalAll">0</span>
+            <span class="total-hex__type-count" id="totalHexTypeCount" title="Distinct card types" hidden
+              >0</span
+            >
           </div>
 
           <div
@@ -66,7 +69,32 @@
       </div>
 
       <!-- Board: pro Kartentyp ein Abschnitt mit zwei Zählern (du / Gegner) -->
-      <main class="board" id="board"></main>
+      <main class="board" id="board">
+        <!-- Schwebende Reset-Steuerung, immer sichtbar: setzt den
+             fokussierten Spieler zurück (siehe `selectedPlayer` in app.js),
+             ohne Fokus alles. position: fixed nimmt beide Buttons aus dem
+             Grid-Layout heraus, sie fressen also keine Kachel. Ein Tipp auf
+             den Reset-Button blendet links daneben einen Bestätigen-Button
+             ein (✓, grün) und färbt den Reset-Button selbst zum
+             Abbrechen-Button um (✕, rot) – explizite Zwei-Tasten-Bestätigung
+             statt des fehleranfälligeren "nochmal auf denselben Button
+             tippen". -->
+        <div class="board-reset-controls" id="boardResetControls">
+          <button
+            class="board-reset-btn board-reset-btn--confirm"
+            id="boardPlayerResetConfirmBtn"
+            type="button"
+            aria-label="Confirm reset"
+            hidden
+          >
+            ✓
+          </button>
+          <button class="board-reset-btn" id="boardPlayerResetBtn" type="button" aria-label="Reset">
+            <img class="board-reset-btn__icon" src="icons/ui/reset.png" alt="" />
+            <span class="board-reset-btn__cancel-icon" hidden>✕</span>
+          </button>
+        </div>
+      </main>
     </div>
 
     <!-- Seitenmenü von rechts, mit Scrim -->
@@ -92,6 +120,7 @@
           <span class="player-names-setting__label">Player names</span>
           <div class="player-names-setting__rows" id="playerNamesRows"></div>
         </div>
+        <div class="side-panel__divider" id="sidePanelDividerPlayers"></div>
         <button class="side-action" id="wakeLockBtn" type="button" aria-pressed="false">
           <img src="icons/ui/lock.png" alt="" />
           <span>Keep screen on</span>
@@ -101,10 +130,20 @@
           <span>Icon watermarks</span>
           <span class="side-action__switch" aria-hidden="true"></span>
         </button>
-        <button class="side-action side-action--danger" id="resetBtn" type="button">
-          <img src="icons/ui/reset.png" alt="" />
-          <span>Reset everything</span>
-        </button>
+        <div class="side-panel__divider" id="sidePanelDividerToggles"></div>
+        <div class="type-visibility-setting" id="typeVisibilitySetting">
+          <span class="type-visibility-setting__label">More types</span>
+          <div class="type-visibility-setting__options">
+            <label class="type-visibility-option">
+              <input type="checkbox" data-optional-type="planeswalker" />
+              <span>Planeswalker</span>
+            </label>
+            <label class="type-visibility-option">
+              <input type="checkbox" data-optional-type="battles" />
+              <span>Battles</span>
+            </label>
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -120,6 +159,10 @@
       <div class="fullscreen-overview__hex">
         <span class="fullscreen-overview__hex-value" id="overviewTotalAll">0</span>
       </div>
+      <div class="fullscreen-overview__meta">
+        <span class="fullscreen-overview__scope" id="overviewScope" hidden></span>
+        <span class="fullscreen-overview__type-count" id="overviewTypeCount">0 types</span>
+      </div>
       <div class="fullscreen-overview__grid" id="overviewGrid"></div>
     </div>
 
@@ -129,6 +172,6 @@
       <button class="toast__undo" id="toastUndoBtn" type="button" hidden>Undo</button>
     </div>
 
-    <script src="app.js?v=1"></script>
+    <script src="app.js?v=19"></script>
   </body>
 </html>
